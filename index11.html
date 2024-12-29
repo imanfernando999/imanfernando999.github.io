@@ -1,0 +1,178 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Download</title>
+    <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-auth.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        nav {
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            <img src="https://via.placeholder.com/300" alt="Movie">
+            <div>
+                <h1>Movie Download</h1>
+                <p>Click the button below to download the movie.</p>
+                <button id="download-btn" class="button hidden">Download</button>
+            </div>
+        </div>
+
+        <div id="auth-section" class="content">
+            <h2>Login to Verify Email</h2>
+            <input type="email" id="email" placeholder="Enter your email" required>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button id="login-btn">Login</button>
+            <button id="google-signin-btn">Sign In with Google</button>
+            <p id="status"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdVbtjtlGYH22U-Ss9W978w19JVHegnxM",
+            authDomain: "track-5f37c.firebaseapp.com",
+            projectId: "track-5f37c",
+            storageBucket: "track-5f37c.appspot.com",
+            messagingSenderId: "424962604956",
+            appId: "1:424962604956:web:a4c8c380b9653d14505259"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Predefined allowed email
+        const allowedEmail = "khclakshan999@gmail.com";
+
+        // Handle Login with Email/Password
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                if (user.email === allowedEmail) {
+                    if (user.emailVerified) {
+                        document.getElementById('auth-section').classList.add('hidden');
+                        document.getElementById('download-btn').classList.remove('hidden');
+                    } else {
+                        document.getElementById('status').textContent = "Please verify your email before accessing the content.";
+                        await sendEmailVerification(user);
+                        document.getElementById('status').textContent += " Verification email sent!";
+                    }
+                } else {
+                    document.getElementById('status').textContent = "Access denied: Email not authorized.";
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = "Error: " + error.message;
+            }
+        });
+
+        // Handle Google Sign-In
+        document.getElementById('google-signin-btn').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                if (user.email === allowedEmail) {
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('download-btn').classList.remove('hidden');
+                    document.getElementById('status').textContent = `Welcome, ${user.displayName}`;
+                } else {
+                    document.getElementById('status').textContent = "Access denied: Email not authorized.";
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = "Error: " + error.message;
+            }
+        });
+
+        // Download function
+        document.getElementById('download-btn').addEventListener('click', () => {
+           // const encodedLink = "aHR0cHM6Ly9kbXMudW9tLmtsL3MvRXp0UWdwZjZIbkg5eXk5"; // Base64-encoded link
+            //const downloadLink = atob(encodedLink); // Decode the link
+            //downloadLink ='https://dms.uom.lk/s/EztQGpf6HnH9yx9/download';
+
+            const a = document.createElement('a');
+            a.href = 'https://dms.uom.lk/s/EztQGpf6HnH9yx9/download';
+            a.download = ''; // Allows the browser to infer the filename
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
+</body>
+</html>
